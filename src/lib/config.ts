@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
   LOGOUT: `${API_BASE_URL}/api/auth/logout`,
   BLOGS: `${API_BASE_URL}/api/blogs`,
   BLOG: (id: string) => `${API_BASE_URL}/api/blogs/${id}`,
+  DEBUG: `${API_BASE_URL}/api/auth/debug`
 };
 
 // Configuration for axios

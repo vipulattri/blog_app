@@ -74,6 +74,10 @@ export async function POST(request: NextRequest) {
       { expiresIn: '7d' }
     );
 
+    // Determine environment
+    const isProduction = process.env.NODE_ENV === 'production';
+    const domain = isProduction ? 'blog-app-ochre-delta-23.vercel.app' : undefined;
+
     // Return token in cookie
     const response = NextResponse.json(
       { message: 'Registration successful' },
@@ -86,8 +90,9 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       path: '/',
       maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
+      domain: domain
     });
 
     return response;

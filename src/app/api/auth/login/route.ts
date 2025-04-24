@@ -114,6 +114,10 @@ export async function POST(request: NextRequest) {
       { expiresIn: '7d' } // Token expires in 7 days
     );
 
+    // Get domain for cookie
+    const isProduction = process.env.NODE_ENV === 'production';
+    const domain = isProduction ? 'blog-app-ochre-delta-23.vercel.app' : undefined;
+
     // Create response with cookie
     const response = NextResponse.json({ 
       success: true, 
@@ -130,9 +134,11 @@ export async function POST(request: NextRequest) {
       name: 'token',
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
-      path: '/'
+      path: '/',
+      sameSite: isProduction ? 'none' : 'lax', // Allow cross-site cookies in production
+      domain: domain // Set domain in production
     });
 
     console.log(`User ${username} logged in successfully`);

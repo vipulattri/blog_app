@@ -190,11 +190,11 @@ export default function HomePage() {
                   <li className="flex items-start gap-2">
                     <span className="text-green-500 mt-1">•</span>
                     <span>Electrician Wala App (beta)</span>
-                  </li>
+          </li>
                   <li className="flex items-start gap-2">
                     <span className="text-green-500 mt-1">•</span>
                     <span>Audio-to-song ML project</span>
-                  </li>
+          </li>
                 </ul>
               </div>
               

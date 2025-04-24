@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
+import { API_ENDPOINTS, API_BASE_URL, axiosConfig } from '@/lib/config';
 
 const Navigation = () => {
   const [user, setUser] = useState<{id: string, username: string, isAdmin: boolean} | null>(null);
@@ -16,7 +16,7 @@ const Navigation = () => {
     const checkAuth = async () => {
       try {
         // Using the debug endpoint to check session
-        const response = await axios.get('/api/auth/debug', axiosConfig);
+        const response = await axios.get(API_ENDPOINTS.DEBUG, axiosConfig);
         if (response.data.authenticated) {
           setUser(response.data.user);
         } else {
