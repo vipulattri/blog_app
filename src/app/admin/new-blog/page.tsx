@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,8 +29,9 @@ export default function NewBlogPage() {
       } else {
         setError(response.data.message || 'Failed to create blog post. Please try again.');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create blog post. Please try again.');
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{message?: string}>;
+      setError(axiosError.response?.data?.message || 'Failed to create blog post. Please try again.');
     } finally {
       setLoading(false);
     }

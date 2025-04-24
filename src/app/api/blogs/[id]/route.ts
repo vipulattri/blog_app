@@ -5,14 +5,21 @@ import { requireAdmin } from '@/lib/auth';
 
 export const runtime = 'nodejs'; // Force Node.js runtime instead of Edge
 
-interface Params {
-  params: {
-    id: string;
-  };
+// Type for blog object from file storage
+interface FileBlog {
+  _id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
 }
 
 // Get a single blog by ID
-export async function GET(request: NextRequest, { params }: Params) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const { id } = params;
     
@@ -26,7 +33,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     } else {
       // Use file-based blog storage
       const blogs = getFileBlogs();
-      blog = blogs.find((blog: any) => blog._id === id);
+      blog = blogs.find((blog: FileBlog) => blog._id === id);
     }
     
     if (!blog) {
@@ -40,12 +47,13 @@ export async function GET(request: NextRequest, { params }: Params) {
       success: true, 
       data: blog 
     });
-  } catch (error: any) {
-    console.error("Error fetching blog:", error.message);
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error fetching blog:", err.message);
     return NextResponse.json(
       { 
         success: false, 
-        message: error.message || 'Failed to fetch blog' 
+        message: err.message || 'Failed to fetch blog' 
       },
       { status: 500 }
     );
@@ -53,7 +61,10 @@ export async function GET(request: NextRequest, { params }: Params) {
 }
 
 // Update a blog by ID
-export async function PUT(request: NextRequest, { params }: Params) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const authResult = await requireAdmin(request);
     
@@ -85,7 +96,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     } else {
       // Use file-based blog storage
       const blogs = getFileBlogs();
-      const blogIndex = blogs.findIndex((blog: any) => blog._id === id);
+      const blogIndex = blogs.findIndex((blog: FileBlog) => blog._id === id);
       
       if (blogIndex === -1) {
         return NextResponse.json(
@@ -98,7 +109,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         ...blogs[blogIndex],
         title,
         content,
-        updatedAt: new Date()
+        updatedAt: new Date().toISOString()
       };
       
       saveFileBlogs(blogs);
@@ -117,12 +128,13 @@ export async function PUT(request: NextRequest, { params }: Params) {
       message: 'Blog updated successfully',
       data: blog
     });
-  } catch (error: any) {
-    console.error("Error updating blog:", error.message);
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error updating blog:", err.message);
     return NextResponse.json(
       { 
         success: false, 
-        message: error.message || 'Failed to update blog' 
+        message: err.message || 'Failed to update blog' 
       },
       { status: 500 }
     );
@@ -130,7 +142,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 // Delete a blog by ID
-export async function DELETE(request: NextRequest, { params }: Params) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const authResult = await requireAdmin(request);
     
@@ -150,7 +165,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     } else {
       // Use file-based blog storage
       const blogs = getFileBlogs();
-      const blogIndex = blogs.findIndex((blog: any) => blog._id === id);
+      const blogIndex = blogs.findIndex((blog: FileBlog) => blog._id === id);
       
       if (blogIndex === -1) {
         return NextResponse.json(
@@ -175,12 +190,13 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       success: true, 
       message: 'Blog deleted successfully'
     });
-  } catch (error: any) {
-    console.error("Error deleting blog:", error.message);
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error deleting blog:", err.message);
     return NextResponse.json(
       { 
         success: false, 
-        message: error.message || 'Failed to delete blog' 
+        message: err.message || 'Failed to delete blog' 
       },
       { status: 500 }
     );

@@ -5,8 +5,25 @@ import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import Link from 'next/link';
 
+interface AuthStatus {
+  authenticated: boolean;
+  message?: string;
+  user?: {
+    id: string;
+    username: string;
+    isAdmin: boolean;
+  };
+  tokenInfo?: {
+    id: string;
+    username: string;
+    isAdmin: boolean;
+    exp?: number;
+  };
+  error?: string;
+}
+
 export default function AdminTestPage() {
-  const [authStatus, setAuthStatus] = useState<any>(null);
+  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 

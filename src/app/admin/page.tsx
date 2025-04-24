@@ -6,11 +6,26 @@ import connectDB, { getFileBlogs, isUsingMongo } from '@/lib/db';
 import Blog, { IBlog } from '@/models/Blog';
 import { formatDate } from '@/lib/utils';
 
-interface BlogWithId extends IBlog {
+// Simple interface for display purposes only
+interface BlogWithId {
   _id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-async function getBlogs() {
+// Define interface for file-based blog
+interface FileBlog {
+  _id?: string;
+  title: string;
+  content: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
+}
+
+async function getBlogs(): Promise<BlogWithId[]> {
   try {
     await connectDB();
     
@@ -25,15 +40,16 @@ async function getBlogs() {
       const blogs = getFileBlogs();
       // Ensure each blog has required fields and sort by createdAt
       return blogs
-        .map((blog: any) => ({
-          ...blog,
+        .map((blog: FileBlog): BlogWithId => ({
           _id: blog._id || String(Math.random()),
+          title: blog.title,
+          content: blog.content,
           createdAt: blog.createdAt || new Date().toISOString(),
           updatedAt: blog.updatedAt || new Date().toISOString()
         }))
-        .sort((a: any, b: any) => {
+        .sort((a, b) => {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        }) as BlogWithId[];
+        });
     }
   } catch (error) {
     console.error('Error getting blogs for admin:', error);

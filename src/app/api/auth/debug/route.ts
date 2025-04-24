@@ -14,6 +14,15 @@ interface TokenPayload {
   iat?: number;
 }
 
+// Define interface for file-based user
+interface FileUser {
+  _id: string;
+  username: string;
+  password: string;
+  isAdmin: boolean;
+  [key: string]: unknown;
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Get the token from cookies
@@ -30,11 +39,12 @@ export async function GET(request: NextRequest) {
     let decoded: TokenPayload;
     try {
       decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const jwtError = error as Error;
       return NextResponse.json({
         authenticated: false,
         message: 'Invalid token',
-        error: error.message
+        error: jwtError.message
       });
     }
     
@@ -60,7 +70,7 @@ export async function GET(request: NextRequest) {
       user = user.toObject();
     } else {
       const users = getFileUsers();
-      user = users.find((u: any) => u._id === decoded.id);
+      user = users.find((u: FileUser) => u._id === decoded.id);
       if (!user) {
         return NextResponse.json({
           authenticated: false,
@@ -91,12 +101,13 @@ export async function GET(request: NextRequest) {
       }
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Debug auth error:', error);
+    const err = error as Error;
     return NextResponse.json({
       authenticated: false,
       message: 'Error checking authentication',
-      error: error.message
+      error: err.message
     });
   }
 } 

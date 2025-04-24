@@ -96,13 +96,13 @@ export default function HomePage() {
                 <p><strong>Languages:</strong> Hindi (native), English (basic)</p>
                 
                 <div className="mt-6 flex space-x-4">
-                  <a href="#" className="text-gray-600 hover:text-blue-600">
+                  <a href="https://github.com/vipulattri" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-blue-600">
                     <Github size={20} />
                   </a>
-                  <a href="#" className="text-gray-600 hover:text-blue-600">
+                  <a href="https://www.linkedin.com/in/vipul-attri-21639824b/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-blue-600">
                     <Linkedin size={20} />
                   </a>
-                  <a href="#" className="text-gray-600 hover:text-blue-600">
+                  <a href="mailto:attrvipul72@gmail.com" className="text-gray-600 hover:text-blue-600">
                     <Mail size={20} />
                   </a>
                 </div>
