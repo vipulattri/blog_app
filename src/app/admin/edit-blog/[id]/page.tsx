@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios, { AxiosError } from 'axios';
@@ -8,40 +8,81 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 
-export default function NewBlogPage() {
+interface BlogParams {
+  params: {
+    id: string;
+  };
+}
+
+export default function EditBlogPage({ params }: BlogParams) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const router = useRouter();
+  const { id } = params;
+
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        const response = await axios.get(`/api/blogs/${id}`);
+        if (response.data.success) {
+          const blog = response.data.data;
+          setTitle(blog.title);
+          setContent(blog.content);
+        } else {
+          setError('Failed to fetch blog details');
+        }
+      } catch (err) {
+        console.error('Error fetching blog:', err);
+        setError('Failed to fetch blog details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlog();
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setSaving(true);
 
     try {
-      const response = await axios.post('/api/blogs', { title, content });
+      const response = await axios.put(`/api/blogs/${id}`, { title, content });
       if (response.data.success) {
         router.push('/admin');
         router.refresh();
       } else {
-        setError(response.data.message || 'Failed to create blog post. Please try again.');
+        setError(response.data.message || 'Failed to update blog post. Please try again.');
       }
     } catch (err: unknown) {
       const axiosError = err as AxiosError<{message?: string}>;
-      setError(axiosError.response?.data?.message || 'Failed to create blog post. Please try again.');
+      setError(axiosError.response?.data?.message || 'Failed to update blog post. Please try again.');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+          <p className="text-xl text-gray-600">Loading blog content...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 lg:py-16">
       <div className="mb-6 sm:mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-stone-900">Create New Blog Post</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-stone-900">Edit Blog Post</h1>
         <Link href="/admin" passHref>
           <Button variant="outline" size="sm" className="flex items-center gap-2">
             <ArrowLeft size={16} />
@@ -53,7 +94,7 @@ export default function NewBlogPage() {
       <Card className="shadow-lg">
         <form onSubmit={handleSubmit}>
           <CardHeader className="sm:pb-4">
-            <CardTitle className="text-xl sm:text-2xl">New Blog Details</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">Edit Blog Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5 px-4 sm:px-6">
             {error && (
@@ -94,10 +135,10 @@ export default function NewBlogPage() {
             </Link>
             <Button 
               type="submit" 
-              disabled={loading} 
+              disabled={saving} 
               className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
             >
-              {loading ? 'Creating...' : 'Create Blog Post'}
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </CardFooter>
         </form>

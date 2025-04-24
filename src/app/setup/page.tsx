@@ -10,6 +10,7 @@ export default function SetupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState(1);
+  const [blogResult, setBlogResult] = useState<any>(null);
 
   const runMongoSetup = async () => {
     try {
@@ -25,6 +26,25 @@ export default function SetupPage() {
     } catch (err) {
       console.error('Setup error:', err);
       setError('MongoDB setup failed. Check if your MONGODB_URI environment variable is set correctly.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createTestBlog = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await axios.get('/api/create-test-blog');
+      setBlogResult(response.data);
+      
+      if (response.data.success) {
+        setStep(3);
+      }
+    } catch (err) {
+      console.error('Create blog error:', err);
+      setError('Failed to create test blog post. Check MongoDB connection.');
     } finally {
       setLoading(false);
     }
@@ -80,6 +100,27 @@ export default function SetupPage() {
               <div className={`mr-2 flex h-6 w-6 items-center justify-center rounded-full ${step === 3 ? 'bg-blue-500' : step > 3 ? 'bg-green-500' : 'bg-gray-300'} text-white`}>
                 3
               </div>
+              Create Test Blog Post
+            </h3>
+            <p className="mt-2 text-gray-600">
+              Create a test blog post to verify MongoDB is working:
+            </p>
+            <div className="mt-4">
+              <Button 
+                onClick={createTestBlog} 
+                disabled={loading || step !== 2 && step !== 3}
+                className="mt-2"
+              >
+                {loading ? 'Creating...' : 'Create Test Blog'}
+              </Button>
+            </div>
+          </div>
+
+          <div className={`${step === 4 ? 'border-blue-500' : step > 4 ? 'border-green-500' : 'border-gray-200'} border p-4 rounded-lg`}>
+            <h3 className="text-lg font-semibold flex items-center">
+              <div className={`mr-2 flex h-6 w-6 items-center justify-center rounded-full ${step === 4 ? 'bg-blue-500' : step > 4 ? 'bg-green-500' : 'bg-gray-300'} text-white`}>
+                4
+              </div>
               Test Login
             </h3>
             <p className="mt-2 text-gray-600">
@@ -96,6 +137,34 @@ export default function SetupPage() {
                 className="mt-2"
               >
                 Go to Login Page
+              </Button>
+            </div>
+          </div>
+
+          <div className={`border-gray-200 border p-4 rounded-lg`}>
+            <h3 className="text-lg font-semibold flex items-center">
+              <div className={`mr-2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-300 text-white`}>
+                ?
+              </div>
+              Debug Information
+            </h3>
+            <p className="mt-2 text-gray-600">
+              If you're experiencing issues, view debug information:
+            </p>
+            <div className="mt-4 flex gap-2">
+              <Button 
+                onClick={() => window.open('/api/debug', '_blank')}
+                variant="outline"
+                className="mt-2"
+              >
+                View Debug Info
+              </Button>
+              <Button 
+                onClick={() => window.open('/auth-test', '_blank')}
+                variant="outline"
+                className="mt-2"
+              >
+                Auth Test Page
               </Button>
             </div>
           </div>
@@ -116,6 +185,19 @@ export default function SetupPage() {
           <CardContent>
             <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-96">
               {JSON.stringify(result, null, 2)}
+            </pre>
+          </CardContent>
+        </Card>
+      )}
+
+      {blogResult && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Test Blog Results</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-96">
+              {JSON.stringify(blogResult, null, 2)}
             </pre>
           </CardContent>
         </Card>
