@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
 
 interface BlogParams {
   params: {
@@ -28,7 +29,7 @@ export default function EditBlogPage({ params }: BlogParams) {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const response = await axios.get(`/api/blogs/${id}`);
+        const response = await axios.get(API_ENDPOINTS.BLOG(id), axiosConfig);
         if (response.data.success) {
           const blog = response.data.data;
           setTitle(blog.title);
@@ -53,7 +54,7 @@ export default function EditBlogPage({ params }: BlogParams) {
     setSaving(true);
 
     try {
-      const response = await axios.put(`/api/blogs/${id}`, { title, content });
+      const response = await axios.put(API_ENDPOINTS.BLOG(id), { title, content }, axiosConfig);
       if (response.data.success) {
         router.push('/admin');
         router.refresh();

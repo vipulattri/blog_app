@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
+import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
 
 interface BlogPost {
   _id: string;
@@ -25,7 +26,7 @@ export default function BlogPage() {
     const fetchBlog = async () => {
       try {
         const id = params.id as string;
-        const response = await axios.get(`/api/blogs/${id}`);
+        const response = await axios.get(API_ENDPOINTS.BLOG(id), axiosConfig);
         
         console.log('Blog response:', response.data);
         
@@ -62,7 +63,10 @@ export default function BlogPage() {
   if (loading) {
     return (
       <div className="container mx-auto py-16 text-center">
-        <p>Loading blog post...</p>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+          <p className="text-xl text-gray-600">Loading blog post...</p>
+        </div>
       </div>
     );
   }
@@ -75,7 +79,7 @@ export default function BlogPage() {
             ← Back
           </Button>
         </div>
-        <div className="rounded-md bg-red-50 p-4 text-red-700">
+        <div className="rounded-md bg-red-50 p-4 text-red-700 border border-red-200">
           {error || 'Blog post not found'}
         </div>
       </div>
@@ -96,9 +100,9 @@ export default function BlogPage() {
           {formatDate(blog.createdAt)}
         </p>
 
-        <div className="relative mb-12 h-64 overflow-hidden rounded-lg bg-gray-200">
+        <div className="relative mb-12 h-64 overflow-hidden rounded-lg bg-gradient-to-r from-blue-400 to-purple-500">
           {/* Placeholder for blog image */}
-          <div className="absolute flex h-full w-full items-center justify-center text-gray-500">
+          <div className="absolute flex h-full w-full items-center justify-center text-white font-bold text-lg">
             Blog Image
           </div>
         </div>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { Github, Linkedin, Mail, Code, BookOpen, Server, Database, Award, Briefcase, MapPin, Calendar } from 'lucide-react';
+import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
 
 interface BlogPost {
   _id: string;
@@ -22,7 +23,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await axios.get('/api/blogs');
+        const response = await axios.get(API_ENDPOINTS.BLOGS, axiosConfig);
         setBlogs(response.data || []);
         setLoading(false);
       } catch (err) {

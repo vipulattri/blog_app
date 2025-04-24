@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
+import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
 
 export default function NewBlogPage() {
   const [title, setTitle] = useState('');
@@ -23,7 +24,7 @@ export default function NewBlogPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/blogs', { title, content });
+      const response = await axios.post(API_ENDPOINTS.BLOGS, { title, content }, axiosConfig);
       if (response.data.success) {
         router.push('/admin');
         router.refresh();

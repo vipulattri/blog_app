@@ -7,6 +7,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -32,7 +33,7 @@ export default function RegisterPage() {
 
     try {
       console.log('Sending registration request:', { username, password: '***' });
-      const response = await axios.post('/api/auth/register', { username, password });
+      const response = await axios.post(API_ENDPOINTS.REGISTER, { username, password }, axiosConfig);
       
       console.log('Registration response:', response.data);
       
@@ -70,12 +71,12 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-500">
+              <div className="rounded-md bg-red-50 p-3 text-sm text-red-500 border border-red-200">
                 {error}
               </div>
             )}
             {success && (
-              <div className="rounded-md bg-green-50 p-3 text-sm text-green-500">
+              <div className="rounded-md bg-green-50 p-3 text-sm text-green-500 border border-green-200">
                 Registration successful! Redirecting to login page...
               </div>
             )}
@@ -123,7 +124,7 @@ export default function RegisterPage() {
           <CardFooter className="flex flex-col space-y-2">
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
               disabled={loading}
             >
               {loading ? 'Registering...' : 'Register'}

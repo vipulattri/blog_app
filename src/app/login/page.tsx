@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Suspense } from 'react';
+import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
 
 // Component that uses searchParams
 function LoginForm() {
@@ -26,7 +27,7 @@ function LoginForm() {
 
     try {
       console.log('Sending login request:', { username, password: '***' });
-      const response = await axios.post('/api/auth/login', { username, password });
+      const response = await axios.post(API_ENDPOINTS.LOGIN, { username, password }, axiosConfig);
       
       console.log('Login response:', response.data);
       

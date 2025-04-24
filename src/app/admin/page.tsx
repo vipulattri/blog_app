@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { Trash2, Edit, Eye, Loader2 } from 'lucide-react';
+import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
 
 interface Blog {
   _id: string;
@@ -27,7 +28,7 @@ export default function AdminDashboard() {
     const checkAdminAndFetchBlogs = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/api/blogs');
+        const response = await axios.get(API_ENDPOINTS.BLOGS, axiosConfig);
         setBlogs(response.data || []);
         setLoading(false);
       } catch (err) {
@@ -47,7 +48,7 @@ export default function AdminDashboard() {
     
     try {
       setDeleteLoading(id);
-      const response = await axios.delete(`/api/blogs/${id}`);
+      const response = await axios.delete(API_ENDPOINTS.BLOG(id), axiosConfig);
       
       if (response.data.success) {
         // Remove the blog from state
