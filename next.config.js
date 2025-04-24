@@ -29,11 +29,11 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Origin',
-            value: 'https://blog-app-ochre-delta-23.vercel.app',
+            value: '*', // Allow all origins
           },
           {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET,DELETE,PATCH,POST,PUT',
+            value: 'GET, DELETE, PATCH, POST, PUT',
           },
           {
             key: 'Access-Control-Allow-Headers',
@@ -50,4 +50,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;
