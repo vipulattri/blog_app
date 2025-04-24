@@ -7,13 +7,27 @@ import connectDB, { getFileUsers, isUsingMongo } from './db';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
+// Check if this module is being loaded during build time
+const isBuildTime = process.env.VERCEL_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+
+// Define stub functions for build time to avoid errors
 export async function signToken(userId: string) {
+  if (isBuildTime) {
+    console.log('Build time: Skipping signToken');
+    return 'build-time-token';
+  }
+  
   return jwt.sign({ id: userId }, JWT_SECRET, {
     expiresIn: '7d',
   });
 }
 
 export async function verifyToken(token: string) {
+  if (isBuildTime) {
+    console.log('Build time: Skipping verifyToken');
+    return null;
+  }
+  
   try {
     return jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
   } catch (error) {
@@ -22,6 +36,11 @@ export async function verifyToken(token: string) {
 }
 
 export async function getSession() {
+  if (isBuildTime) {
+    console.log('Build time: Skipping getSession');
+    return null;
+  }
+  
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -63,15 +82,16 @@ export async function getSession() {
       } else {
         console.log(`getSession: User not found in MongoDB with id ${decoded.id}`);
       }
-    } catch (mongoError: any) {
-      console.log(`getSession: MongoDB lookup error: ${mongoError.message}`);
+    } catch (mongoError) {
+      const error = mongoError as Error;
+      console.log(`getSession: MongoDB lookup error: ${error.message}`);
       // Continue to file lookup if MongoDB lookup fails
     }
     
     // Fall back to file-based storage if MongoDB lookup fails
     console.log('getSession: Falling back to file storage lookup');
     const users = getFileUsers();
-    const user = users.find((u: any) => u._id === decoded.id);
+    const user = users.find((u) => u._id === decoded.id);
     
     if (!user) {
       console.log(`getSession: User not found in file storage with id ${decoded.id}`);
@@ -93,6 +113,11 @@ export async function getSession() {
 }
 
 export async function requireAuth(request: NextRequest) {
+  if (isBuildTime) {
+    console.log('Build time: Skipping requireAuth');
+    return { user: { id: 'build-user', isAdmin: true } };
+  }
+  
   try {
     const token = request.cookies.get('token')?.value;
     
@@ -119,7 +144,7 @@ export async function requireAuth(request: NextRequest) {
     } else {
       // Use file-based user storage
       const users = getFileUsers();
-      user = users.find((u: any) => u._id === decoded.id);
+      user = users.find((u) => u._id === decoded.id);
     }
     
     if (!user) {
@@ -140,6 +165,11 @@ export async function requireAuth(request: NextRequest) {
 }
 
 export async function requireAdmin(request: NextRequest) {
+  if (isBuildTime) {
+    console.log('Build time: Skipping requireAdmin');
+    return { user: { id: 'build-user', isAdmin: true } };
+  }
+  
   try {
     const authResult = await requireAuth(request);
     

@@ -1,0 +1,22 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {
+        "timeout": 300,
+        "maxDuration": 300
+      }
+    }
+  ],
+  "env": {
+    "SKIP_DB_CONNECTION_IN_BUILD": "true",
+    "NODE_OPTIONS": "--max-old-space-size=3072"
+  },
+  "build": {
+    "env": {
+      "SKIP_DB_CONNECTION_IN_BUILD": "true",
+      "NODE_OPTIONS": "--max-old-space-size=3072"
+    }
+  }
+} 

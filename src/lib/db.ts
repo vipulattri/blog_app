@@ -2,7 +2,14 @@ import mongoose, { Mongoose } from 'mongoose';
 
 // Database connection constants
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/blog_app';
-console.log('MongoDB connection string:', MONGODB_URI);
+
+// Skip connection logs during build time
+const isBuildTime = process.env.VERCEL_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
+const isVercelProduction = !!process.env.VERCEL_ENV;
+
+if (!isBuildTime) {
+  console.log('MongoDB connection string:', MONGODB_URI);
+}
 
 // Global interface for mongoose cache
 interface MongooseCache {
@@ -19,15 +26,15 @@ declare global {
 let cached = global.mongoose ?? (global.mongoose = { conn: null, promise: null });
 let isMongoConnected = false;
 
-// File storage variables (only initialized on server)
+// File storage variables (only initialized on server and not in Vercel)
 let fsModule: any = null;
 let pathModule: any = null;
 let DATA_DIR: string = '';
 let BLOGS_FILE: string = '';
 let USERS_FILE: string = '';
 
-// Initialize file storage on server only
-if (typeof window === 'undefined') {
+// Initialize file storage on server only (not during build and not in Vercel production)
+if (typeof window === 'undefined' && !isBuildTime && !isVercelProduction) {
   // Import modules dynamically to avoid "Module not found" errors in the browser
   const initFileStorage = async () => {
     try {
@@ -75,6 +82,13 @@ if (typeof window === 'undefined') {
  * Connect to MongoDB database
  */
 async function connectDB(): Promise<Mongoose | null> {
+  // Skip MongoDB connection during build time
+  if (process.env.SKIP_DB_CONNECTION_IN_BUILD === 'true') {
+    console.log('Skipping MongoDB connection during build time (environment variable set)');
+    isMongoConnected = false;
+    return null;
+  }
+
   try {
     // Return cached connection if available
     if (cached.conn) {
@@ -113,16 +127,22 @@ async function connectDB(): Promise<Mongoose | null> {
 }
 
 /**
- * Check if MongoDB is connected
+ * Check if MongoDB is connected or if we're running in Vercel (always use MongoDB there)
  */
 export function isUsingMongo(): boolean {
-  return isMongoConnected;
+  return isMongoConnected || isVercelProduction;
 }
 
 /**
  * Get blogs from file storage
  */
 export function getFileBlogs(): any[] {
+  // In Vercel production, always return empty array to force MongoDB usage
+  if (isVercelProduction) {
+    console.log('File operations not available in Vercel environment - returning empty array');
+    return [];
+  }
+
   if (typeof window !== 'undefined' || !fsModule) {
     console.warn('File operations not available on client side');
     return [];
@@ -141,6 +161,12 @@ export function getFileBlogs(): any[] {
  * Save blogs to file storage
  */
 export function saveFileBlogs(blogs: any[]): boolean {
+  // In Vercel production, return false to indicate file operations aren't supported
+  if (isVercelProduction) {
+    console.log('File operations not available in Vercel environment - save operation skipped');
+    return false;
+  }
+
   if (typeof window !== 'undefined' || !fsModule) {
     console.warn('File operations not available on client side');
     return false;
@@ -159,6 +185,12 @@ export function saveFileBlogs(blogs: any[]): boolean {
  * Get users from file storage
  */
 export function getFileUsers(): any[] {
+  // In Vercel production, return empty array to force MongoDB usage
+  if (isVercelProduction) {
+    console.log('File operations not available in Vercel environment - returning empty array');
+    return [];
+  }
+
   if (typeof window !== 'undefined' || !fsModule) {
     console.warn('File operations not available on client side');
     return [];
@@ -177,6 +209,12 @@ export function getFileUsers(): any[] {
  * Save users to file storage
  */
 export function saveFileUsers(users: any[]): boolean {
+  // In Vercel production, return false to indicate file operations aren't supported
+  if (isVercelProduction) {
+    console.log('File operations not available in Vercel environment - save operation skipped');
+    return false;
+  }
+
   if (typeof window !== 'undefined' || !fsModule) {
     console.warn('File operations not available on client side');
     return false;

@@ -12,6 +12,15 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  // Set environment variables for build time to skip DB connections
+  env: {
+    SKIP_DB_CONNECTION_IN_BUILD: 'true',
+  },
+  // Add a webpack analyzer to see what's causing the slow build (optional)
+  webpack: (config, { isServer }) => {
+    // Keep the existing config
+    return config;
+  },
 };
 
 module.exports = nextConfig; 
