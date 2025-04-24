@@ -25,11 +25,7 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Origin',
-HEAD
-            value: '*', // Allow all origins
-
-            value: 'https://blog-app-sji9.onrender.com', // Updated to your new Render URL
-1799c108fc409a52392c0a9e125637318d68addb
+            value: '*', // Allow all origins (use cautiously in production)
           },
           {
             key: 'Access-Control-Allow-Methods',
