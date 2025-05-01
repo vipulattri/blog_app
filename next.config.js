@@ -29,7 +29,11 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Origin',
+<<<<<<< HEAD
             value: '*', // Allow all origins
+=======
+            value: '*', // Allow all origins (use cautiously in production)
+>>>>>>> a5713ce46f68eb47d5f8acd5eaae88b2ac94fda0
           },
           {
             key: 'Access-Control-Allow-Methods',
