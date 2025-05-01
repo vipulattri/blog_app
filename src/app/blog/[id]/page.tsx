@@ -3,17 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
-import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
-
-interface BlogPost {
-  _id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { blogService, BlogPost } from '@/lib/blogService';
 
 export default function BlogPage() {
   const params = useParams();
@@ -23,22 +14,15 @@ export default function BlogPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchBlog = async () => {
+    const fetchBlog = () => {
       try {
         const id = params.id as string;
-        const response = await axios.get(API_ENDPOINTS.BLOG(id), axiosConfig);
+        const fetchedBlog = blogService.getBlogById(id);
         
-        console.log('Blog response:', response.data);
-        
-        if (response.data.success && response.data.data) {
-          // Extract the blog from the response.data.data
-          setBlog(response.data.data);
-        } else if (response.data._id) {
-          // Direct blog object in response (for backwards compatibility)
-          setBlog(response.data);
+        if (fetchedBlog) {
+          setBlog(fetchedBlog);
         } else {
-          setError('Blog post not found or invalid format');
-          console.error('Invalid blog format:', response.data);
+          setError('Blog post not found');
         }
         setLoading(false);
       } catch (err) {

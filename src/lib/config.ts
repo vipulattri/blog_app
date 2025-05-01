@@ -1,28 +1,40 @@
-// Configuration file to manage environment-specific settings
+// Configuration file for frontend-only application
 
-// Determine base API URL based on environment
-const isDevelopment = process.env.NODE_ENV === 'development';
-
-// Use localhost in development, actual domain in production
-export const API_BASE_URL = isDevelopment 
-  ? '' // Empty string means relative URLs will use current domain (localhost)
-  : 'https://blog-app-ochre-delta-23.vercel.app';
-
-// API endpoints
-export const API_ENDPOINTS = {
-  LOGIN: `${API_BASE_URL}/api/auth/login`,
-  REGISTER: `${API_BASE_URL}/api/auth/register`,
-  LOGOUT: `${API_BASE_URL}/api/auth/logout`,
-  BLOGS: `${API_BASE_URL}/api/blogs`,
-  BLOG: (id: string) => `${API_BASE_URL}/api/blogs/${id}`,
-  DEBUG: `${API_BASE_URL}/api/auth/debug`
+// Local storage keys
+export const STORAGE_KEYS = {
+  BLOGS: 'blog_posts',
+  USER: 'current_user',
+  AUTH_TOKEN: 'auth_token'
 };
 
-// Configuration for axios
-export const axiosConfig = {
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
+// Default blog data
+export const DEFAULT_BLOGS = [
+  {
+    _id: '1',
+    title: 'Welcome to My Tech Blog',
+    content: 'This is my first blog post. I\'ll be sharing my thoughts and experiences about technology and development here.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
+// Local storage helper functions
+export const storage = {
+  get: (key: string) => {
+    if (typeof window !== 'undefined') {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    }
+    return null;
   },
-  withCredentials: true, // Important for cookies/authentication
+  set: (key: string, value: any) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  },
+  remove: (key: string) => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(key);
+    }
+  }
 }; 

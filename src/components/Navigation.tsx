@@ -1,87 +1,75 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { API_ENDPOINTS, API_BASE_URL, axiosConfig } from '@/lib/config';
+import { Button } from '@/components/ui/button';
+import { authService } from '@/lib/authService';
 
-const Navigation = () => {
-  const [user, setUser] = useState<{id: string, username: string, isAdmin: boolean} | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function Navigation() {
+  const [user, setUser] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       try {
-        // Using the debug endpoint to check session
-        const response = await axios.get(API_ENDPOINTS.DEBUG, axiosConfig);
-        if (response.data.authenticated) {
-          setUser(response.data.user);
+        const authState = authService.init();
+        if (authState.isAuthenticated) {
+          setUser(authState.user);
         } else {
           setUser(null);
         }
-      } catch (error) {
-        console.error("Error checking auth:", error);
+      } catch (err) {
+        console.error('Error checking auth:', err);
         setUser(null);
-      } finally {
-        setLoading(false);
       }
     };
 
     checkAuth();
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
-      await axios.post(API_ENDPOINTS.LOGOUT, {}, axiosConfig);
+      authService.logout();
       setUser(null);
-      // Redirect to home page after logout
       router.push('/');
-      
-      // Force a refresh to update state across the app
-      window.location.href = '/';
-    } catch (error) {
-      console.error("Error logging out:", error);
+    } catch (err) {
+      console.error('Error logging out:', err);
     }
   };
 
   return (
-    <nav className="border-b border-stone-200 bg-white py-4">
-      <div className="container mx-auto flex items-center justify-between px-4">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="text-xl font-bold text-stone-900">
-            Vipul&apos;s Blog
+    <nav className="bg-white shadow-sm">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
+          <Link href="/" className="text-xl font-bold text-gray-800">
+            Blog App
           </Link>
-          <Link href="/" className="text-stone-600 hover:text-stone-900">
-            Home
-          </Link>
-          <Link href="/blogs" className="text-stone-600 hover:text-stone-900">
-            All Blogs
-          </Link>
-        </div>
-        <div className="flex items-center gap-4">
-          {loading ? (
-            <span className="text-sm text-gray-500">Loading...</span>
-          ) : user?.isAdmin ? (
-            <>
-              <Link href="/admin" passHref>
-                <Button variant="secondary">Admin Dashboard</Button>
-              </Link>
-              <Button variant="ghost" onClick={handleLogout}>Log Out</Button>
-            </>
-          ) : user ? (
-            <Button variant="ghost" onClick={handleLogout}>Log Out</Button>
-          ) : (
-            <Link href="/login" passHref>
-              <Button variant="outline">Login</Button>
-            </Link>
-          )}
+          <div className="flex items-center gap-4">
+            {user ? (
+              <>
+                {authService.isAdmin() && (
+                  <Link href="/admin">
+                    <Button variant="outline">Admin Dashboard</Button>
+                  </Link>
+                )}
+                <Button onClick={handleLogout} variant="ghost">
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="outline">Login</Button>
+                </Link>
+                <Link href="/register">
+                  <Button>Register</Button>
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>
   );
-};
-
-export default Navigation; 
+} 

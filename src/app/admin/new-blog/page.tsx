@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios, { AxiosError } from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
-import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
+import { blogService } from '@/lib/blogService';
+import { authService } from '@/lib/authService';
 
 export default function NewBlogPage() {
   const [title, setTitle] = useState('');
@@ -24,16 +24,22 @@ export default function NewBlogPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post(API_ENDPOINTS.BLOGS, { title, content }, axiosConfig);
-      if (response.data.success) {
+      // Check if user is admin
+      if (!authService.isAdmin()) {
+        router.push('/login?from=/admin/new-blog');
+        return;
+      }
+
+      const newBlog = blogService.createBlog({ title, content });
+      if (newBlog) {
         router.push('/admin');
         router.refresh();
       } else {
-        setError(response.data.message || 'Failed to create blog post. Please try again.');
+        setError('Failed to create blog post. Please try again.');
       }
-    } catch (err: unknown) {
-      const axiosError = err as AxiosError<{message?: string}>;
-      setError(axiosError.response?.data?.message || 'Failed to create blog post. Please try again.');
+    } catch (err) {
+      console.error('Error creating blog:', err);
+      setError('Failed to create blog post. Please try again.');
     } finally {
       setLoading(false);
     }

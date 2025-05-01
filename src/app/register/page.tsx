@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
+import { authService } from '@/lib/authService';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -32,16 +32,13 @@ export default function RegisterPage() {
     }
 
     try {
-      console.log('Sending registration request:', { username, password: '***' });
-      const response = await axios.post(API_ENDPOINTS.REGISTER, { username, password }, axiosConfig);
+      const result = authService.register(username, email, password);
       
-      console.log('Registration response:', response.data);
-      
-      // The registration endpoint returns { message: 'Registration successful' }
-      if (response.status === 201) {
+      if (result?.isAuthenticated) {
         setSuccess(true);
         // Clear form
         setUsername('');
+        setEmail('');
         setPassword('');
         setConfirmPassword('');
         // Redirect to login page after a short delay
@@ -49,18 +46,18 @@ export default function RegisterPage() {
           router.push('/login');
         }, 2000);
       } else {
-        setError(response.data.error || 'Registration failed. Please try again.');
+        setError('Registration failed. Please try again.');
       }
-    } catch (err: any) {
-      console.error('Registration error:', err.response || err);
-      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto flex min-h-[70vh] items-center justify-center px-4 py-16">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="mx-auto w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Register</CardTitle>
@@ -94,6 +91,19 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="Enter your email"
+              />
+            </div>
+            <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
                 Password
               </label>
@@ -103,8 +113,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Choose a password"
-                minLength={6}
+                placeholder="Create a password"
               />
             </div>
             <div className="space-y-2">
@@ -124,15 +133,15 @@ export default function RegisterPage() {
           <CardFooter className="flex flex-col space-y-2">
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              className="w-full"
               disabled={loading}
             >
               {loading ? 'Registering...' : 'Register'}
             </Button>
-            <div className="text-center text-sm mt-2">
-              Already have an account?{' '}
-              <Link href="/login" className="text-blue-500 hover:underline">
-                Login here
+            <div className="text-center text-sm">
+              <span className="text-gray-500">Already have an account? </span>
+              <Link href="/login" className="text-blue-600 hover:underline">
+                Login
               </Link>
             </div>
           </CardFooter>

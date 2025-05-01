@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios, { AxiosError } from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
+import { blogService } from '@/lib/blogService';
+import { authService } from '@/lib/authService';
 
 interface BlogParams {
   params: {
@@ -27,11 +27,16 @@ export default function EditBlogPage({ params }: BlogParams) {
   const { id } = params;
 
   useEffect(() => {
-    const fetchBlog = async () => {
+    const fetchBlog = () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.BLOG(id), axiosConfig);
-        if (response.data.success) {
-          const blog = response.data.data;
+        // Check if user is admin
+        if (!authService.isAdmin()) {
+          router.push('/login?from=/admin/edit-blog/' + id);
+          return;
+        }
+
+        const blog = blogService.getBlogById(id);
+        if (blog) {
           setTitle(blog.title);
           setContent(blog.content);
         } else {
@@ -46,7 +51,7 @@ export default function EditBlogPage({ params }: BlogParams) {
     };
 
     fetchBlog();
-  }, [id]);
+  }, [id, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,16 +59,22 @@ export default function EditBlogPage({ params }: BlogParams) {
     setSaving(true);
 
     try {
-      const response = await axios.put(API_ENDPOINTS.BLOG(id), { title, content }, axiosConfig);
-      if (response.data.success) {
+      // Check if user is admin
+      if (!authService.isAdmin()) {
+        router.push('/login?from=/admin/edit-blog/' + id);
+        return;
+      }
+
+      const updatedBlog = blogService.updateBlog(id, { title, content });
+      if (updatedBlog) {
         router.push('/admin');
         router.refresh();
       } else {
-        setError(response.data.message || 'Failed to update blog post. Please try again.');
+        setError('Failed to update blog post. Please try again.');
       }
-    } catch (err: unknown) {
-      const axiosError = err as AxiosError<{message?: string}>;
-      setError(axiosError.response?.data?.message || 'Failed to update blog post. Please try again.');
+    } catch (err) {
+      console.error('Error updating blog:', err);
+      setError('Failed to update blog post. Please try again.');
     } finally {
       setSaving(false);
     }

@@ -3,17 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import axios from 'axios';
 import { Github, Linkedin, Mail, Code, BookOpen, Server, Database, Award, Briefcase, MapPin, Calendar } from 'lucide-react';
-import { API_ENDPOINTS, axiosConfig } from '@/lib/config';
-
-interface BlogPost {
-  _id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { DEFAULT_BLOGS } from '@/lib/config';
+import { blogService, BlogPost } from '@/lib/blogService';
 
 export default function HomePage() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
@@ -21,10 +13,17 @@ export default function HomePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchBlogs = async () => {
+    const fetchBlogs = () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.BLOGS, axiosConfig);
-        setBlogs(response.data || []);
+        // Get blogs from blogService
+        const storedBlogs = blogService.getAllBlogs();
+        if (storedBlogs.length === 0) {
+          // Initialize with default blogs if no blogs exist
+          DEFAULT_BLOGS.forEach(blog => blogService.createBlog(blog));
+          setBlogs(DEFAULT_BLOGS);
+        } else {
+          setBlogs(storedBlogs);
+        }
         setLoading(false);
       } catch (err) {
         console.error('Error fetching blogs:', err);
