@@ -147,7 +147,7 @@ export default function HomePage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-blue-500 mt-1">•</span>
-                    <span>Bachelor of Commerce (B.Com)</span>
+                      
                   </li>
                 </ul>
               </div>
